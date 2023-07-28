@@ -1,0 +1,117 @@
+[
+  {
+    "content": "This function returns the value of the private variable _name, which represents the name of the token.",
+    "desc": "Returns the name of the token.",
+    "func": "name()"
+  },
+  {
+    "content": "This function returns the value of the private variable _symbol, which represents the symbol of the token.",
+    "desc": "Returns the symbol of the token.",
+    "func": "symbol()"
+  },
+  {
+    "content": "This function returns the value 18, which represents the number of decimal places used for the token.",
+    "desc": "Returns the number of decimals used to get its user representation.",
+    "func": "decimals()"
+  },
+  {
+    "content": "This function returns the value of the private variable _totalSupply, which represents the total supply of the token.",
+    "desc": "Returns the total supply of the token.",
+    "func": "totalSupply()"
+  },
+  {
+    "content": "This function returns the value of the mapping _balances[account], which represents the balance of tokens owned by the specified account.",
+    "desc": "Returns the balance of tokens owned by the specified account.",
+    "func": "balanceOf(address account)"
+  },
+  {
+    "content": "This function transfers the specified amount of tokens from the caller's account to the specified account. It updates the balances of the sender and receiver accordingly.",
+    "desc": "Transfers tokens from the caller's account to the specified account.",
+    "func": "transfer(address to, uint256 amount)"
+  },
+  {
+    "content": "This function returns the value of the mapping _allowances[owner][spender], which represents the allowance of tokens for the specified spender by the owner.",
+    "desc": "Returns the allowance of tokens for the specified spender by the owner.",
+    "func": "allowance(address owner, address spender)"
+  },
+  {
+    "content": "This function sets the allowance of tokens for the specified spender by the caller to the specified amount. It updates the allowances mapping accordingly.",
+    "desc": "Sets the allowance of tokens for the specified spender by the caller.",
+    "func": "approve(address spender, uint256 amount)"
+  },
+  {
+    "content": "This function transfers the specified amount of tokens from the 'from' account to the 'to' account using the allowance mechanism. It updates the balances and allowances accordingly.",
+    "desc": "Transfers tokens from one account to another using the allowance mechanism.",
+    "func": "transferFrom(address from, address to, uint256 amount)"
+  },
+  {
+    "content": "This function atomically increases the allowance granted to the specified spender by the caller by the specified addedValue. It updates the allowances mapping accordingly.",
+    "desc": "Atomically increases the allowance granted to the specified spender by the caller.",
+    "func": "increaseAllowance(address spender, uint256 addedValue)"
+  },
+  {
+    "content": "This function atomically decreases the allowance granted to the specified spender by the caller by the specified subtractedValue. It updates the allowances mapping accordingly.",
+    "desc": "Atomically decreases the allowance granted to the specified spender by the caller.",
+    "func": "decreaseAllowance(address spender, uint256 subtractedValue)"
+  },
+  {
+    "content": "This internal function is used to transfer the specified amount of tokens from the 'from' account to the 'to' account. It is called by the transfer and transferFrom functions. It updates the balances and emits a Transfer event.",
+    "desc": "Internal function to transfer tokens from one account to another.",
+    "func": "_transfer(address from, address to, uint256 amount)"
+  },
+  {
+    "content": "This internal function is used to create and assign the specified amount of tokens to the specified account. It is called by the constructor of the AirToken contract. It updates the total supply, balances, and emits a Transfer event.",
+    "desc": "Internal function to create and assign tokens to an account.",
+    "func": "_mint(address account, uint256 amount)"
+  },
+  {
+    "content": "This internal function is used to destroy the specified amount of tokens from the specified account. It is called by the burn function. It updates the total supply, balances, and emits a Transfer event.",
+    "desc": "Internal function to destroy tokens from an account.",
+    "func": "_burn(address account, uint256 amount)"
+  },
+  {
+    "content": "This internal function is used to set the allowance of tokens for the specified spender by the owner to the specified amount. It is called by the approve function. It updates the allowances mapping and emits an Approval event.",
+    "desc": "Internal function to set the allowance of tokens for the specified spender by the owner.",
+    "func": "_approve(address owner, address spender, uint256 amount)"
+  },
+  {
+    "content": "This internal function is used to update the allowance of tokens for the specified spender by the owner based on the spent amount. It is called by the transferFrom function. It checks if the current allowance is not unlimited and updates the allowances mapping accordingly.",
+    "desc": "Internal function to update the allowance based on spent amount.",
+    "func": "_spendAllowance(address owner, address spender, uint256 amount)"
+  },
+  {
+    "content": "This internal hook is called before any token transfer (including minting and burning). It can be overridden in derived contracts to add custom logic.",
+    "desc": "Internal hook called before any token transfer.",
+    "func": "_beforeTokenTransfer(address from, address to, uint256 amount)"
+  },
+  {
+    "content": "This internal hook is called after any token transfer (including minting and burning). It can be overridden in derived contracts to add custom logic.",
+    "desc": "Internal hook called after any token transfer.",
+    "func": "_afterTokenTransfer(address from, address to, uint256 amount)"
+  },
+  {
+    "content": "",
+    "desc": "Private variable to store the name of the token.",
+    "func": "_name"
+  },
+  {
+    "content": "",
+    "desc": "Private variable to store the symbol of the token.",
+    "func": "_symbol"
+  },
+  {
+    "content": "",
+    "desc": "Private mapping to store the balances of token holders.",
+    "func": "_balances"
+  },
+  {
+    "content": "",
+    "desc": "Private mapping to store the allowances of token holders for spenders.",
+    "func": "_allowances"
+  },
+  {
+    "content": "",
+    "desc": "Private variable to store the total supply of the token.",
+    "func": "_totalSupply"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Dead Code in Context._msgData(): The function `_msgData()` in the `Context` contract is never used and should be removed.",
+    "score": 7
+  },
+  {
+    "content": "Dead Code in ERC20._burn(address,uint256): The function `_burn(address,uint256)` in the `ERC20` contract is never used and should be removed.",
+    "score": 7
+  },
+  {
+    "content": "Incorrect Versions of Solidity: The pragma version `^0.8.0` is used in multiple places in the code, allowing older versions of Solidity. It is recommended to use the latest stable version of Solidity to avoid potential vulnerabilities.",
+    "score": 5
+  }
+]
