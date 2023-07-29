@@ -19,10 +19,15 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import mockContractExplanation from "~assets/mock-explan.json"
 import mockContractVulnerability from "~assets/mock-vulner.json"
-import type { Explanation, Vulnerability } from "~background/messages/astar-contract"
+import type {
+  Explanation,
+  Vulnerability
+} from "~background/messages/etherscan-contract"
+import type { RiskResult } from "~background/messages/kekkai"
+import { useKekkaiRisk } from "~lib/hooks/useKekkai"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://astar.subscan.io/account/*"]
+  matches: ["https://etherscan.io/address/*"]
 }
 
 export const getStyle: PlasmoGetStyle = () => {
@@ -31,7 +36,8 @@ export const getStyle: PlasmoGetStyle = () => {
   return style
 }
 
-const contractDetailsPanelSelector = ".account-balance-meta"
+const contractDetailsPanelSelector =
+  "#ContentPlaceHolder1_divSummary > div.row.g-3.mb-4"
 export const getInlineAnchor: PlasmoGetInlineAnchor = () =>
   document.querySelector(contractDetailsPanelSelector)
 
@@ -41,7 +47,18 @@ const riskDeductionScores = {
   high: 10
 }
 
-const calculateScore = (vulners?: Vulnerability[]) => {
+const calculateScore = (vulners?: Vulnerability[], riskLevel?: string) => {
+  // TODO: Simple risk score calculation, use different algo later
+  if (riskLevel?.toLowerCase() === "high") {
+    return 70
+  }
+  if (riskLevel?.toLowerCase() === "medium") {
+    return 85
+  }
+  if (riskLevel?.toLowerCase() === "low") {
+    return 90
+  }
+
   if (typeof vulners === "undefined") {
     return "-"
   }
@@ -81,11 +98,29 @@ const DEMO_DATA = {
   }
 }
 
+const stingMap: Record<Exclude<keyof RiskResult, "riskLevel">, string> = {
+  isInBlacklist: "is in blacklist",
+  isUnableApprove: "is unable approve",
+  isUnableTransfer: "is unable transfer",
+  isVerifyInOpensea: "is verify in opensea",
+  isMalicious: "is malicious",
+  isProxy: "is proxy",
+  isNonRetainOwnership: "is non retain ownership",
+  isTransferPaused: "is transfer paused",
+  isHadTradingCoolingTime: "is had trading cooling time",
+  isExternalCall: "is external call",
+  isSelfDestruct: "is self destruct",
+  isFake: "is fake",
+  isNonOpenSource: "is non open source",
+  isNoSupplyLimit: "is no supply limit",
+  isIllegalBurn: "is illegal burn"
+}
+
 const ContractPanels = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   const address = location.pathname
-    .replace(/\/account\/(.*)?.*/, "$1")
+    .replace(/\/address\/(.*)?.*/, "$1")
     .toLowerCase()
     .trim()
 
@@ -106,7 +141,7 @@ const ContractPanels = () => {
       try {
         setIsLoading(true)
         const contractData = (await sendToBackground({
-          name: "astar-contract",
+          name: "etherscan-contract",
           body: {
             contractAddress: address
           }
@@ -155,20 +190,30 @@ const ContractPanels = () => {
       }
     })()
   }, [address])
+  const { risk } = useKekkaiRisk(address)
+  const inRiskKeys = Object.entries(risk ?? {})
+    .map(([key, isInRisk]) => (isInRisk && key !== "riskLevel" ? key : null))
+    .filter((x) => !!x)
 
   const currentContractData = isLoading ? null : storageContractData?.[address]
-  const isContractVerified = !!currentContractData?.explanation.length
-  const score = calculateScore(currentContractData?.vulnerability)
+  const isContractVerified = !!currentContractData?.explanation.length || !!risk
+  const score = calculateScore(
+    currentContractData?.vulnerability,
+    risk?.riskLevel
+  )
   const alarms =
-    currentContractData?.vulnerability.filter((x) => x.score >= 15).length ??
-    "-"
+    (currentContractData?.vulnerability.filter((x) => x.score >= 15).length ??
+      0) + inRiskKeys.length || "-"
   const warns =
-    currentContractData?.vulnerability.filter((x) => x.score >= 15).length ??
+    (currentContractData?.vulnerability.filter(
+      (x) => x.score >= 9 && x.score < 15
+    ).length ??
+      0) ||
     "-"
 
   return (
-    <div className="kekkai-flex kekkai-flex-wrap kekkai-min-w-full kekkai-mt-5">
-      <div className="kekkai-flex-1 kekkai-bg-white kekkai-text-astar-foreground kekkai-p-5 kekkai-mr-5 kekkai-mb-5 sm:kekkai-mb-0 kekkai-border kekkai-border-astar-border kekkai-rounded-[4px] kekkai-flex kekkai-flex-wrap kekkai-gap-6 kekkai-min-h-[14rem] kekkai-shadow-astar">
+    <div className="kekkai-flex kekkai-flex-wrap kekkai-min-w-full">
+      <div className="kekkai-flex-1 kekkai-bg-white kekkai-text-etherscan-foreground kekkai-p-5 kekkai-mr-5 kekkai-mb-5 sm:kekkai-mb-0 kekkai-border kekkai-border-etherscan-border kekkai-rounded-etherscanCard kekkai-flex kekkai-flex-wrap kekkai-gap-6 kekkai-min-h-[14rem] kekkai-shadow-etherscan">
         <div className="kekkai-flex kekkai-flex-col kekkai-gap-2">
           <div>
             <h3 className="title kekkai-text-sm kekkai-font-semibold">
@@ -189,7 +234,7 @@ const ContractPanels = () => {
               <BellAlertIcon className="kekkai-w-4 kekkai-h-4" />
               <p className="kekkai-capitalize kekkai-align-middle kekkai-text-sm">
                 Alarm{" "}
-                <span className="title kekkai-text-astar-foreground">
+                <span className="title kekkai-text-etherscan-foreground">
                   {alarms}
                 </span>
               </p>
@@ -198,7 +243,7 @@ const ContractPanels = () => {
               <ExclamationTriangleIcon className="kekkai-w-4 kekkai-h-4" />
               <p className="kekkai-capitalize kekkai-align-middle">
                 Warn{" "}
-                <span className="title kekkai-text-astar-foreground">
+                <span className="title kekkai-text-etherscan-foreground">
                   {warns}
                 </span>
               </p>
@@ -212,7 +257,7 @@ const ContractPanels = () => {
             Contract analysis
           </h3>
           {/* List */}
-          <div className="kekkai-flex kekkai-flex-col kekkai-flex-wrap kekkai-gap-1 kekkai-mt-1 kekkai-bg-astar-paper kekkai-rounded kekkai-p-5">
+          <div className="kekkai-flex kekkai-flex-col kekkai-flex-wrap kekkai-gap-1 kekkai-mt-1 kekkai-bg-etherscan-paper kekkai-rounded-etherscanInnerCard kekkai-border kekkai-border-etherscan-border kekkai-p-5">
             {isLoading &&
               Array.from({ length: 12 })
                 .fill(0)
@@ -242,6 +287,16 @@ const ContractPanels = () => {
                 </p>
               </div>
             )}
+            {inRiskKeys.map((key) => (
+              <div
+                className="kekkai-flex kekkai-items-start kekkai-gap-1 kekkai-w-[calc(50%-8px)] kekkai-pr-8"
+                key={`risk ${risk}`}>
+                <XCircleIcon className="kekkai-w-4 kekkai-h-4 kekkai-text-red-500" />
+                <p className="kekkai-capitalize kekkai-flex-1 kekkai-break-words kekkai-text-sm">
+                  {stingMap[key]}
+                </p>
+              </div>
+            ))}
             {currentContractData?.vulnerability?.map((v) => (
               <div
                 className="kekkai-flex kekkai-items-start kekkai-gap-1 kekkai-w-[calc(50%-8px)] kekkai-pr-8"
@@ -266,7 +321,7 @@ const ContractPanels = () => {
         </div>
       </div>
 
-      <div className="kekkai-bg-white kekkai-text-astar-foreground kekkai-p-5 kekkai-border kekkai-border-astar-border kekkai-rounded-[4px] kekkai-flex kekkai-flex-col kekkai-flex-wrap kekkai-gap-6 kekkai-h-fit">
+      <div className="kekkai-bg-white kekkai-text-etherscan-foreground kekkai-shadow-etherscan kekkai-p-5 kekkai-border kekkai-border-etherscan-border kekkai-rounded-etherscanCard kekkai-flex kekkai-flex-col kekkai-flex-wrap kekkai-gap-6 kekkai-h-fit">
         <div className="kekkai-inline-flex kekkai-items-center kekkai-gap-6 kekkai-justify-between">
           <a
             href="https://kekkai.io/"
@@ -298,7 +353,7 @@ const ContractPanels = () => {
               background: `linear-gradient(90deg, #DB694E 0%, #D7F86E 100%)`
             }}>
             <div
-              className="kekkai-h-8 kekkai-w-8 kekkai-border-4 kekkai-rounded-lg kekkai-border-astar-secondary kekkai-absolute kekkai-top-1/2 transform -kekkai-translate-y-1/2 -kekkai-translate-x-1/2 kekkai-transition-all"
+              className="kekkai-h-8 kekkai-w-8 kekkai-border-4 kekkai-rounded-lg kekkai-border-etherscan-secondary kekkai-absolute kekkai-top-1/2 transform -kekkai-translate-y-1/2 -kekkai-translate-x-1/2 kekkai-transition-all"
               style={{ left: `${typeof score === "number" ? score : 50}%` }}
             />
           </div>

@@ -1,7 +1,7 @@
 {
   "name": "kekkai-explorer-extension",
   "displayName": "Kekkai Explorer Extension",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Extension to keep track of contract status and analysis",
   "author": "Kekkai Team ",
   "scripts": {
